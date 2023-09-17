@@ -17,20 +17,14 @@
 trigger SyncChatterFeeds on FeedItem (after insert, after update) {
     for(FeedItem feedItem : Trigger.new) {
         Id parentId;
+        parentId = feedItem.ParentId;
+
         String sobjectType = parentId.getSObjectType().getDescribe().getName();
         String title;
         String message;
         FeedItem opportunityFeedItem;
 
-        parentId = feedItem.ParentId;
-
         if(sobjectType == 'Projet__c') {
-            Map<String, Object> inputMap = new Map<String, Object>();
-            Map<String, Object> outputMap = new Map<String, Object>();
-            Map<String, Object> optionsMap = new Map<String, Object>();
-
-            inputMap.put('RecordId', parentId);
-
             try{
                 Projet__c project = [SELECT Name FROM Projet__c WHERE Id = :parentId];
                 Opportunity opportunity = [SELECT Id FROM Opportunity WHERE Projet__c = :parentId];
@@ -65,7 +59,7 @@ trigger SyncChatterFeeds on FeedItem (after insert, after update) {
 
                     opportunityFeedItem.Body = feedItem.Body;
 
-                    insert opportunityFeedItem;
+                    update opportunityFeedItem;
 
                     title = 'Post Chatter modifié';
                     message = 'Post Chatter modifié sur le projet ' + project.Name;
